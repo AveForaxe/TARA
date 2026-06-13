@@ -68,3 +68,4 @@ pnpm-debug.log*
 # =====================
 backend/.env
 frontend/.env
+mcp.json
