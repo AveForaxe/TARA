@@ -1,0 +1,37 @@
+{
+  "name": "TARA Digital Hub",
+  "short_name": "TARA",
+  "description": "Platform digital terintegrasi untuk Karang Taruna. Satu QR untuk semua urusan warga.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070B14",
+  "theme_color": "#070B14",
+  "orientation": "portrait-primary",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "social"],
+  "shortcuts": [
+    {
+      "name": "Kegiatan",
+      "url": "/kegiatan",
+      "description": "Lihat kegiatan Karang Taruna"
+    },
+    {
+      "name": "Lapor Warga",
+      "url": "/lapor",
+      "description": "Buat laporan warga"
+    },
+    {
+      "name": "Dasbor",
+      "url": "/dasbor",
+      "description": "Buka dasbor warga"
+    }
+  ]
+}

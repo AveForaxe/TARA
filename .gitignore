@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables — JANGAN pernah di-commit
+.env
+backend/.env
+frontend/.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Prisma generated client
+backend/node_modules/.prisma/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Config dengan secrets
+mcp.json
+
+# Folder duplikat/sisa
+middlewares/
+
+# Temp files
+original_styles.css
+original_styles.txt
+recovered_styles.css
+styles_log.json
+package-lock.json

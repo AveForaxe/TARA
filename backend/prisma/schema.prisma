@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  ucid        String    @unique
+  nama        String
+  blok        String
+  role        String    @default("WARGA")
+  deviceId    String?
+  isActivated Boolean   @default(false)
+  qrToken     String
+  createdAt   DateTime  @default(now())
+  finances    Finance[]
+  reports     Report[]
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  title           String
+  date            String
+  description     String
+  location        String
+  status          String   @default("Mendatang")
+  proposal_url    String   @default("")
+  proposal_status String   @default("Menunggu")
+  createdAt       DateTime @default(now())
+  registrations   EventRegistration[]
+}
+
+model Report {
+  id            String   @id @default(cuid())
+  reporter_ucid String
+  category      String
+  title         String
+  description   String
+  location      String
+  photoUrl      String?
+  status        String   @default("Menunggu")
+  createdAt     DateTime @default(now())
+  reporter      User     @relation(fields: [reporter_ucid], references: [ucid], onDelete: Cascade)
+}
+
+model Finance {
+  id             String   @id @default(cuid())
+  ucid           String
+  jenis_iuran    String
+  nominal        Float
+  status         String   @default("Belum Bayar")
+  bukti_transfer String?
+  date           DateTime @default(now())
+  user           User     @relation(fields: [ucid], references: [ucid], onDelete: Cascade)
+}
+
+model EventRegistration {
+  id           String   @id @default(cuid())
+  event_id     String
+  nama         String
+  phone        String
+  alamat       String
+  ucid         String?
+  registeredAt DateTime @default(now())
+  event        Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  price       Int
+  description String
+  icon        String   @default("inventory_2")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  actor_ucid String
+  actor_name String?
+  actor_role String
+  timestamp  DateTime @default(now())
+  ip_address String?
+  details    Json?
+}
