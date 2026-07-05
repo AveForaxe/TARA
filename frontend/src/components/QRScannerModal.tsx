@@ -190,7 +190,20 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ onSuccess, onClo
           </button>
         </div>
 
-        {/* Center: viewfinder + overlays */}
+        {/* Frame — positioned over the full modal so it aligns with the camera qrbox center */}
+        {camState === 'active' && !scanSuccess && (
+          <div className="wqs-frame-wrap">
+            <div className="wqs-frame">
+              <div className="wqs-c wqs-tl" />
+              <div className="wqs-c wqs-tr" />
+              <div className="wqs-c wqs-bl" />
+              <div className="wqs-c wqs-br" />
+              <div className="wqs-laser" />
+            </div>
+          </div>
+        )}
+
+        {/* Center: state overlays only */}
         <div className="wqs-center">
           {/* Loading */}
           {camState === 'loading' && (
@@ -216,19 +229,6 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ onSuccess, onClo
             <div className="wqs-success-overlay">
               <div className="wqs-success-ring">
                 <span className="material-icons-round">check</span>
-              </div>
-            </div>
-          )}
-
-          {/* Frame */}
-          {camState === 'active' && !scanSuccess && (
-            <div className="wqs-frame-wrap">
-              <div className="wqs-frame">
-                <div className="wqs-c wqs-tl" />
-                <div className="wqs-c wqs-tr" />
-                <div className="wqs-c wqs-bl" />
-                <div className="wqs-c wqs-br" />
-                <div className="wqs-laser" />
               </div>
             </div>
           )}
@@ -389,15 +389,16 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ onSuccess, onClo
         @keyframes wqsPop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* QR Frame */
+        /* Frame wrapper — direct child of modal, covers full screen → aligns with camera qrbox */
         .wqs-frame-wrap {
           position: absolute; inset: 0; pointer-events: none; z-index: 4;
           display: flex; align-items: center; justify-content: center;
         }
         .wqs-frame {
           position: relative;
-          width: min(68vw, 260px);
-          height: min(68vw, 260px);
-          overflow: hidden;
+          width: min(72vw, 270px);
+          height: min(72vw, 270px);
+          /* no overflow:hidden — lets glow render fully */
         }
         .wqs-c {
           position: absolute; width: 32px; height: 32px;
@@ -409,17 +410,16 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ onSuccess, onClo
         .wqs-bl { bottom:0;left:0;  border-width:0 0 3px 3px; border-radius:0 0 0 8px; }
         .wqs-br { bottom:0;right:0; border-width:0 3px 3px 0; border-radius:0 0 8px 0; }
         .wqs-laser {
-          position: absolute; left: 4px; right: 4px; height: 2px;
-          background: linear-gradient(90deg, transparent, var(--cyber-pink, #ff4d8d), #fff8, var(--cyber-pink, #ff4d8d), transparent);
-          box-shadow: 0 0 12px var(--cyber-pink, #ff4d8d);
-          border-radius: 2px;
+          position: absolute; left: 0; right: 0; height: 2px;
+          background: linear-gradient(90deg, transparent 0%, var(--cyber-pink, #ff4d8d) 20%, #fffc 50%, var(--cyber-pink, #ff4d8d) 80%, transparent 100%);
+          box-shadow: 0 0 10px 1px var(--cyber-pink, #ff4d8d);
           animation: wqsLaser 2.2s ease-in-out infinite;
         }
         @keyframes wqsLaser {
-          0%   { top: 4px; opacity: 0; }
+          0%   { top: 0; opacity: 0; }
           8%   { opacity: 1; }
           92%  { opacity: 1; }
-          100% { top: calc(100% - 6px); opacity: 0; }
+          100% { top: calc(100% - 2px); opacity: 0; }
         }
 
         /* Bottom sheet */

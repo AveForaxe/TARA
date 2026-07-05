@@ -377,7 +377,7 @@ export const AdminQRScannerModal: React.FC<AdminQRScannerModalProps> = ({ onSucc
         .qrs-frame {
           position: relative;
           width: 62%; height: 62%;
-          overflow: hidden;
+          /* no overflow:hidden — lets glow render fully */
         }
         .qrs-corner {
           position: absolute;
@@ -392,15 +392,14 @@ export const AdminQRScannerModal: React.FC<AdminQRScannerModalProps> = ({ onSucc
         .qrs-bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 6px; }
         .qrs-br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 6px 0; }
         .qrs-scanline {
-          position: absolute; left: 3px; right: 3px; height: 3px;
-          border-radius: 2px;
+          position: absolute; left: 0; right: 0; height: 3px;
           animation: qrsScan 2.2s ease-in-out infinite;
         }
         @keyframes qrsScan {
-          0%   { top: 3px;  opacity: 0; }
+          0%   { top: 0;  opacity: 0; }
           8%   { opacity: 1; }
           92%  { opacity: 1; }
-          100% { top: calc(100% - 6px); opacity: 0; }
+          100% { top: calc(100% - 3px); opacity: 0; }
         }
 
         /* Torch */
