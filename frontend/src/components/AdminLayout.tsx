@@ -76,6 +76,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: 'Data Keuangan', path: `${ADMIN_PATH}/keuangan-data`, icon: 'receipt_long', roles: [ROLES.DEVELOPER, ROLES.KEUANGAN] },
     { name: 'Data Kegiatan', path: `${ADMIN_PATH}/kegiatan`, icon: 'event_note', roles: [ROLES.DEVELOPER, ROLES.KARANG_TARUNA] },
     { name: 'Laporan Masuk', path: `${ADMIN_PATH}/laporan`, icon: 'report_problem', roles: [ROLES.DEVELOPER, ROLES.ADMINISTRATOR, ROLES.KETUA_RT] },
+    { name: 'Produk Pasar', path: `${ADMIN_PATH}/produk`, icon: 'storefront', roles: [ROLES.DEVELOPER, ROLES.KARANG_TARUNA] },
     { name: 'Log Sistem', path: `${ADMIN_PATH}/logs`, icon: 'security', roles: [ROLES.DEVELOPER] },
   ];
 

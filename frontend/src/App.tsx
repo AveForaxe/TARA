@@ -15,6 +15,7 @@ import { ManajemenLaporan } from './pages/admin/ManajemenLaporan';
 import { Keuangan } from './pages/admin/Keuangan';
 import { AuditLogs } from './pages/admin/AuditLogs';
 import { ManajemenKegiatan } from './pages/admin/ManajemenKegiatan';
+import { ManajemenProduk } from './pages/admin/ManajemenProduk';
 
 import { ADMIN_PATH } from './utils/constants';
 import { DashboardDeveloper } from './pages/admin/DashboardDeveloper';
@@ -52,6 +53,7 @@ export const App: React.FC = () => {
             <Route path={`${ADMIN_PATH}/laporan`} element={<AdminLayout><ManajemenLaporan /></AdminLayout>} />
             <Route path={`${ADMIN_PATH}/kegiatan`} element={<AdminLayout><ManajemenKegiatan /></AdminLayout>} />
             <Route path={`${ADMIN_PATH}/logs`} element={<AdminLayout><AuditLogs /></AdminLayout>} />
+            <Route path={`${ADMIN_PATH}/produk`} element={<AdminLayout><ManajemenProduk /></AdminLayout>} />
 
             {/* Fallbacks */}
             <Route path={`${ADMIN_PATH}/*`} element={<AdminLayout><NotFound /></AdminLayout>} />

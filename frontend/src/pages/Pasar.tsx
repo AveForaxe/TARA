@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Reveal } from '../components/Reveal';
 import { useNotification } from '../context/NotificationContext';
+import { getApiBaseUrl } from '../utils/api';
 
 interface Product {
   id: string;
@@ -30,7 +31,7 @@ export const Pasar: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/products');
+      const res = await fetch(`${getApiBaseUrl()}/api/products`);
       const data = await res.json();
       if (Array.isArray(data)) setProducts(data);
     } catch {
