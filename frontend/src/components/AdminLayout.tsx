@@ -97,11 +97,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div style={{ textAlign: 'center', marginBottom: '36px' }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: '56px', height: '56px',
-              background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.2)',
-              borderRadius: '16px', marginBottom: '18px',
+              width: '64px', height: '64px',
+              borderRadius: '18px', marginBottom: '18px', overflow: 'hidden',
             }}>
-              <span className="material-icons-round" style={{ fontSize: '28px', color: '#3b82f6' }}>shield</span>
+              <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <h1 style={{ color: '#f9fafb', fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
               TARA Admin Portal
@@ -149,8 +148,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         }}
       >
         <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ width: '32px', height: '32px', background: '#3b82f6', borderRadius: '8px', display: 'grid', placeItems: 'center' }}>
-            <span className="material-icons-round" style={{ color: '#fff', fontSize: '20px' }}>shield</span>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+            <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           {isSidebarOpen && <span style={{ fontWeight: 700, letterSpacing: '1px', color: '#fff', fontSize: '1.1rem' }}>TARA SYS</span>}
         </div>

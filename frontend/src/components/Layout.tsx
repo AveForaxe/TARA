@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
       <div className="nav-container">
         <Link to="/" className="nav-logo">
           <div className="logo-icon">
-            <span className="material-icons-round">hub</span>
+            <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <span className="logo-text">TARA</span>
         </Link>
