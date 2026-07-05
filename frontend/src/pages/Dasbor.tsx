@@ -5,49 +5,39 @@ import { useCounter } from '../hooks/useCounter';
 import { QRScannerModal } from '../components/QRScannerModal';
 import { apiFetch } from '../utils/api';
 
-const CounterCard = ({ icon, target, label, colorClass }: { icon: string, target: number, label: string, colorClass: string }) => {
+interface Stats {
+  totalWarga: number;
+  totalLaporan: number;
+  eventMendatang: number;
+}
+
+const StatCard = ({ icon, target, label, color }: { icon: string; target: number; label: string; color: string }) => {
   const { count, elementRef } = useCounter(target);
   return (
-    <div className="glass-card" style={{ padding: '32px 24px', textAlign: 'center', background: '#161719', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-      <span className={`material-icons-round ${colorClass}`} style={{ fontSize: '32px', marginBottom: '16px', display: 'block' }}>{icon}</span>
-      <div style={{ fontSize: '2.8rem', fontWeight: 800, color: '#fff', marginBottom: '8px', lineHeight: 1 }} ref={elementRef}>{count.toLocaleString()}</div>
-      <div style={{ fontSize: '0.75rem', color: 'var(--on-surface-variant)', letterSpacing: '0.15em', fontWeight: 700, textTransform: 'uppercase' }}>{label}</div>
+    <div className="dasbor-stat-card">
+      <span className="material-icons-round dasbor-stat-icon" style={{ color }}>{icon}</span>
+      <div className="dasbor-stat-num" ref={elementRef}>{count.toLocaleString('id-ID')}</div>
+      <div className="dasbor-stat-label">{label}</div>
     </div>
   );
 };
 
-export const Dasbor: React.FC = () => {
-  const [isLocked, setIsLocked] = useState(true);
-  const [showScanner, setShowScanner] = useState(false);
-  const [stats, setStats] = useState({
-    totalWarga: 0,
-    totalLaporan: 0,
-    eventMendatang: 0
-  });
-  const [user, setUser] = useState<any>(null);
+const getInitials = (name: string) =>
+  name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
-  const fetchStats = async () => {
-    try {
-      const res = await apiFetch('/api/stats');
-      const data = await res.json();
-      setStats({
-        totalWarga: data.totalWarga,
-        totalLaporan: data.totalLaporan,
-        eventMendatang: data.eventMendatang
-      });
-    } catch (err) {
-      console.error('Gagal mengambil statistik:', err);
-    }
-  };
+export const Dasbor: React.FC = () => {
+  const [isLocked, setIsLocked]       = useState(true);
+  const [showScanner, setShowScanner] = useState(false);
+  const [user, setUser]               = useState<any>(null);
+  const [stats, setStats]             = useState<Stats>({ totalWarga: 0, totalLaporan: 0, eventMendatang: 0 });
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('tara_token');
-    const savedUser = localStorage.getItem('tara_user');
-    if (savedToken && savedUser) {
-      setIsLocked(false);
-      setUser(JSON.parse(savedUser));
-    }
-    fetchStats();
+    const token = localStorage.getItem('tara_token');
+    const saved = localStorage.getItem('tara_user');
+    if (token && saved) { setIsLocked(false); setUser(JSON.parse(saved)); }
+    apiFetch('/api/stats').then(r => r.json()).then(d => {
+      setStats({ totalWarga: d.totalWarga, totalLaporan: d.totalLaporan, eventMendatang: d.eventMendatang });
+    }).catch(() => {});
   }, []);
 
   const handleAuthSuccess = (userData: any) => {
@@ -59,259 +49,464 @@ export const Dasbor: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('tara_token');
     localStorage.removeItem('tara_user');
+    localStorage.removeItem('tara_device_id');
     setIsLocked(true);
     setUser(null);
   };
 
-  return (
-    <div className="page-enter" style={{ 
-      position: 'relative', 
-      height: isLocked ? '100vh' : 'auto', 
-      overflow: isLocked ? 'hidden' : 'visible' 
-    }}>
-      {/* Pink Glow when unlocked */}
-      {!isLocked && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          pointerEvents: 'none',
-          boxShadow: 'inset 0 0 100px rgba(216, 150, 167, 0.05)',
-          zIndex: 0,
-          animation: 'fade-in 1s ease'
-        }} />
-      )}
+  const ROLE_COLOR: Record<string, string> = {
+    DEVELOPER:     '#a78bfa',
+    ADMINISTRATOR: '#60a5fa',
+    KEUANGAN:      '#34d399',
+    'KARANG TARUNA': '#f472b6',
+    'KETUA RT':    '#fb923c',
+    WARGA:         '#94a3b8',
+  };
+  const roleColor = user ? (ROLE_COLOR[user.role] || '#94a3b8') : '#94a3b8';
 
-      <section className="page-header" style={{ filter: isLocked ? 'blur(8px)' : 'none', transition: 'filter 0.8s ease' }}>
-        <div className="container">
-          <Reveal>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1 }}>
-                <span className="section-badge">CITIZEN DASHBOARD</span>
-                <h1 style={{ marginBottom: '8px' }}>Selamat Datang, <span className="text-gradient">{user ? user.nama : 'Warga'}</span>.</h1>
-                <p style={{ maxWidth: '600px', margin: 0 }}>Pantau kontribusi Anda, laporkan masalah lokal, dan tetap terhubung dengan inisiatif Karang Taruna.</p>
-              </div>
-              
-              {!isLocked && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div className="glass-card" style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '12px', 
-                    padding: '8px 12px 8px 16px',
-                    borderRadius: '50px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    backdropFilter: 'blur(10px)'
-                  }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--on-surface-variant)' }}>
-                      {user?.ucid || 'TARA-USER'}
-                    </span>
-                    <button 
-                      onClick={handleLogout}
-                      style={{
-                        background: 'rgba(248, 113, 113, 0.1)',
-                        border: '1px solid rgba(248, 113, 113, 0.2)',
-                        color: '#f87171',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      }}
-                      className="logout-btn-hover"
-                      title="Keluar"
-                    >
-                      <span className="material-icons-round" style={{ fontSize: '18px' }}>logout</span>
+  return (
+    <>
+      <div className="page-enter" style={{ position: 'relative', minHeight: '100vh' }}>
+
+        {/* ── Page header ── */}
+        <section className="page-header" style={{
+          filter: isLocked ? 'blur(10px)' : 'none',
+          transition: 'filter 0.7s ease',
+          pointerEvents: isLocked ? 'none' : 'auto',
+        }}>
+          <div className="container">
+            <Reveal>
+              <div className="dasbor-header-row">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span className="section-badge">CITIZEN DASHBOARD</span>
+                  <h1 style={{ marginBottom: '8px' }}>
+                    Selamat Datang,{' '}
+                    <span className="text-gradient">{user ? user.nama.split(' ')[0] : 'Warga'}</span>.
+                  </h1>
+                  <p style={{ maxWidth: '560px', margin: 0, color: 'var(--on-surface-variant)' }}>
+                    Pantau kontribusi Anda, laporkan masalah lingkungan, dan tetap terhubung dengan kegiatan Karang Taruna.
+                  </p>
+                </div>
+
+                {!isLocked && user && (
+                  <div className="dasbor-user-chip">
+                    <div className="dasbor-avatar" style={{ background: `${roleColor}22`, border: `1px solid ${roleColor}44` }}>
+                      <span style={{ color: roleColor, fontWeight: 800, fontSize: '0.9rem' }}>
+                        {getInitials(user.nama)}
+                      </span>
+                    </div>
+                    <div className="dasbor-user-info">
+                      <span className="dasbor-user-name">{user.nama}</span>
+                      <span className="dasbor-user-meta" style={{ color: roleColor }}>
+                        {user.role} · {user.blok}
+                      </span>
+                    </div>
+                    <button onClick={handleLogout} className="dasbor-logout-btn" title="Keluar">
+                      <span className="material-icons-round">logout</span>
                     </button>
                   </div>
-                </div>
-              )}
-            </div>
-          </Reveal>
-        </div>
-      </section>
+                )}
+              </div>
+            </Reveal>
+          </div>
+        </section>
 
-      <style>{`
-        .logout-btn-hover:hover {
-          background: #f87171 !important;
-          color: #fff !important;
-          transform: rotate(-10deg) scale(1.1);
-          box-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
-        }
-      `}</style>
+        {/* ── Main content ── */}
+        <section className="section" style={{
+          paddingTop: '32px',
+          filter: isLocked ? 'blur(12px)' : 'none',
+          transition: 'filter 0.7s ease',
+          pointerEvents: isLocked ? 'none' : 'auto',
+        }}>
+          <div className="container">
 
-      <section className="section" style={{ paddingTop: '40px', filter: isLocked ? 'blur(12px)' : 'none', transition: 'filter 0.8s ease' }}>
-        <div className="container">
-          <Reveal>
-            {/* Stats Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: '16px', marginBottom: '32px' }}>
-              <CounterCard icon="groups" target={stats.totalWarga} label="WARGA TERDAFTAR" colorClass="text-pink-500" />
-              <CounterCard icon="event" target={stats.eventMendatang} label="KEGIATAN AKTIF" colorClass="text-blue-400" />
-              <CounterCard icon="check_circle" target={stats.totalLaporan} label="LAPORAN MASUK" colorClass="text-green-400" />
-              <CounterCard icon="storefront" target={35} label="UMKM MITRA" colorClass="text-orange-300" />
-            </div>
-          </Reveal>
+            {/* Stats grid */}
+            <Reveal>
+              <div className="dasbor-stats-grid">
+                <StatCard icon="groups"     target={stats.totalWarga}     label="WARGA TERDAFTAR" color="#f472b6" />
+                <StatCard icon="event"      target={stats.eventMendatang} label="KEGIATAN AKTIF"  color="#60a5fa" />
+                <StatCard icon="flag"       target={stats.totalLaporan}   label="LAPORAN MASUK"   color="#34d399" />
+                <StatCard icon="storefront" target={35}                   label="UMKM MITRA"       color="#fb923c" />
+              </div>
+            </Reveal>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }} className="dasbor-two-col">
-            {/* Left Column */}
-            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {/* Issue Tracker */}
-              <Reveal className="glass-card" style={{ background: '#161719', padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <h3 style={{ color: '#fff', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.2rem' }}>
-                    <span className="material-icons-round text-pink-500">campaign</span> Laporan & Aspirasi Saya
-                  </h3>
-                  <Link to="/lapor" className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.8rem', borderRadius: '10px' }}>
-                    <span className="material-icons-round" style={{ fontSize: '18px' }}>add_circle</span> Buat Laporan
-                  </Link>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', background: '#1e1f23', borderRadius: '12px' }}>
-                    <span className="material-icons-round text-pink-500" style={{ fontSize: '20px' }}>warning</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>Street Lighting Failure - Sector 4</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--outline)' }}>2 jam lalu • Public Works</div>
+            {/* Two-column layout */}
+            <div className="dasbor-two-col">
+
+              {/* Left column */}
+              <div className="dasbor-left-col">
+
+                {/* My reports */}
+                <Reveal className="glass-card dasbor-card">
+                  <div className="dasbor-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="material-icons-round" style={{ color: 'var(--cyber-pink)' }}>campaign</span>
+                      <h3 className="dasbor-card-title">Laporan Saya</h3>
                     </div>
-                    <span className="status-badge status-progress">Proses</span>
+                    <Link to="/lapor" className="btn btn-primary btn-sm">
+                      <span className="material-icons-round">add</span> Buat Laporan
+                    </Link>
                   </div>
-                </div>
-                <Link to="/lapor" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '24px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--cyber-pink)' }}>
-                  Lihat Semua Laporan <span className="material-icons-round" style={{ fontSize: '18px' }}>arrow_forward</span>
-                </Link>
-              </Reveal>
 
-              {/* Announcements */}
-              <Reveal className="glass-card" style={{ background: '#161719', padding: '24px' }}>
-                <h3 style={{ color: '#fff', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
-                  <span className="material-icons-round text-blue-400">campaign</span> Pengumuman
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ padding: '20px', background: '#1e1f23', borderRadius: '12px' }}>
-                    <h4 style={{ color: '#fff', marginBottom: '8px', fontSize: '1rem' }}>Lokakarya Literasi Digital</h4>
-                    <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.85rem', lineHeight: 1.5 }}>Bergabunglah di Balai Warga untuk pelatihan keamanan digital dan penggunaan alat komunitas.</p>
+                  {/* Empty state if no real data yet */}
+                  <div className="dasbor-empty-state">
+                    <span className="material-icons-round dasbor-empty-icon">inbox</span>
+                    <p>Belum ada laporan yang dibuat.</p>
+                    <Link to="/lapor" style={{ color: 'var(--cyber-pink)', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}>
+                      Buat laporan pertama →
+                    </Link>
                   </div>
-                </div>
-              </Reveal>
-            </div>
-            
-            {/* Right Column */}
-            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <Reveal className="glass-card" style={{ textAlign: 'center', borderColor: 'rgba(255,77,141,0.15)', background: '#161719', padding: '32px 24px' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.15em', color: '#ffb3c6', display: 'block', marginBottom: '24px' }}>SKOR DAMPAK ANDA</span>
-                <div style={{ width: '160px', height: '160px', borderRadius: '50%', border: '6px solid var(--cyber-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 0 40px rgba(255,77,141,0.3), inset 0 0 20px rgba(255,77,141,0.2)' }}>
-                  <span style={{ fontSize: '4rem', fontWeight: 800, color: '#fff' }}>87</span>
-                </div>
-                <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.85rem' }}>Top 5% of community contributors this month.</p>
-              </Reveal>
+                </Reveal>
 
-              {/* Peta Lokal */}
-              <Reveal className="glass-card" style={{ padding: '24px' }}>
-                <h3 style={{ color: '#fff', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
-                  <span className="material-icons-round text-green-400">map</span> Peta Lokal
-                </h3>
-                <div style={{ background: '#111216', borderRadius: '12px', height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.03)', marginBottom: '16px' }}>
-                  <span className="material-icons-round" style={{ fontSize: '48px', color: 'var(--on-surface-variant)', marginBottom: '12px' }}>public</span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--on-surface-variant)' }}>Peta interaktif komunitas</span>
-                </div>
-              </Reveal>
+                {/* Quick actions */}
+                <Reveal className="glass-card dasbor-card">
+                  <div className="dasbor-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="material-icons-round" style={{ color: '#60a5fa' }}>apps</span>
+                      <h3 className="dasbor-card-title">Layanan Warga</h3>
+                    </div>
+                  </div>
+                  <div className="dasbor-quick-grid">
+                    {[
+                      { icon: 'campaign',   label: 'Buat Laporan', to: '/lapor',   color: 'var(--cyber-pink)' },
+                      { icon: 'event',      label: 'Kegiatan',     to: '/kegiatan', color: '#60a5fa' },
+                      { icon: 'storefront', label: 'Pasar TARA',   to: '/pasar',   color: '#fb923c' },
+                      { icon: 'home',       label: 'Beranda',      to: '/',        color: '#34d399' },
+                    ].map(item => (
+                      <Link key={item.to} to={item.to} className="dasbor-quick-item">
+                        <div className="dasbor-quick-icon" style={{ background: `${item.color}15`, border: `1px solid ${item.color}25` }}>
+                          <span className="material-icons-round" style={{ color: item.color }}>{item.icon}</span>
+                        </div>
+                        <span className="dasbor-quick-label">{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </Reveal>
+              </div>
+
+              {/* Right column */}
+              <div className="dasbor-right-col">
+
+                {/* User identity card */}
+                <Reveal className="glass-card dasbor-card dasbor-identity-card">
+                  <div style={{ textAlign: 'center' }}>
+                    <div className="dasbor-identity-avatar" style={{
+                      background: isLocked ? 'rgba(255,255,255,0.04)' : `${roleColor}18`,
+                      border: `2px solid ${isLocked ? 'rgba(255,255,255,0.08)' : `${roleColor}40`}`,
+                      boxShadow: isLocked ? 'none' : `0 0 30px ${roleColor}25`,
+                    }}>
+                      {user
+                        ? <span style={{ fontSize: '2rem', fontWeight: 800, color: roleColor }}>{getInitials(user.nama)}</span>
+                        : <span className="material-icons-round" style={{ fontSize: '2.2rem', color: '#374151' }}>person</span>
+                      }
+                    </div>
+                    <div className="dasbor-identity-name">{user ? user.nama : '—'}</div>
+                    <div className="dasbor-identity-ucid">{user ? user.ucid : 'Belum masuk'}</div>
+                    {user && (
+                      <span className="dasbor-role-badge" style={{ background: `${roleColor}18`, color: roleColor, border: `1px solid ${roleColor}30` }}>
+                        {user.role}
+                      </span>
+                    )}
+                  </div>
+
+                  {user && (
+                    <div className="dasbor-identity-meta">
+                      <div className="dasbor-meta-row">
+                        <span className="material-icons-round">holiday_village</span>
+                        <span>Blok {user.blok}</span>
+                      </div>
+                      <div className="dasbor-meta-row">
+                        <span className="material-icons-round">verified_user</span>
+                        <span>Terverifikasi</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {isLocked && (
+                    <button className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }} onClick={() => setShowScanner(true)}>
+                      <span className="material-icons-round">qr_code_scanner</span>
+                      Scan QR untuk Masuk
+                    </button>
+                  )}
+                </Reveal>
+
+                {/* Info card */}
+                <Reveal className="glass-card dasbor-card">
+                  <div className="dasbor-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="material-icons-round" style={{ color: '#34d399' }}>info</span>
+                      <h3 className="dasbor-card-title">Info Komunitas</h3>
+                    </div>
+                  </div>
+                  <div className="dasbor-info-list">
+                    <div className="dasbor-info-item">
+                      <span className="material-icons-round" style={{ color: '#60a5fa', fontSize: '18px' }}>notifications_active</span>
+                      <div>
+                        <div style={{ color: '#e5e7eb', fontSize: '0.85rem', fontWeight: 600 }}>Karang Taruna TARA</div>
+                        <div style={{ color: '#4b5563', fontSize: '0.75rem' }}>Platform digital komunitas warga</div>
+                      </div>
+                    </div>
+                    <div className="dasbor-info-item">
+                      <span className="material-icons-round" style={{ color: '#34d399', fontSize: '18px' }}>security</span>
+                      <div>
+                        <div style={{ color: '#e5e7eb', fontSize: '0.85rem', fontWeight: 600 }}>Data Aman & Terenkripsi</div>
+                        <div style={{ color: '#4b5563', fontSize: '0.75rem' }}>Identitas dijaga dengan JWT 30 hari</div>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      {/* Lock Overlay */}
+      {/* ── Lock overlay ── */}
       {isLocked && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 150,
-          display: 'grid',
-          placeItems: 'center',
-          background: 'rgba(2, 4, 12, 0.4)',
-          backdropFilter: 'blur(24px)',
-          padding: '24px',
-          animation: 'fade-in 0.8s ease'
-        }}>
-          <Reveal className="glass-card" style={{ 
-            padding: '48px 32px', 
-            textAlign: 'center', 
-            maxWidth: '420px', 
-            background: 'rgba(22, 23, 25, 0.7)', 
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 40px 100px rgba(0, 0, 0, 0.6)'
-          }}>
-            <div style={{ 
-              width: '80px', height: '80px', 
-              borderRadius: '50%', background: 'rgba(255, 77, 141, 0.1)',
-              display: 'grid', placeItems: 'center', margin: '0 auto 24px',
-              border: '1px solid rgba(255, 77, 141, 0.3)',
-              boxShadow: '0 0 30px rgba(255, 77, 141, 0.2)'
-            }}>
-              <span className="material-icons-round" style={{ 
-                fontSize: '40px', color: 'var(--cyber-pink)',
-                animation: 'pulse-slow 2s infinite'
-              }}>lock</span>
+        <div className="dasbor-lock-overlay">
+          <Reveal className="dasbor-lock-card">
+            {/* Animated lock icon */}
+            <div className="dasbor-lock-icon-wrap">
+              <span className="material-icons-round dasbor-lock-icon">lock</span>
             </div>
-            
-            <h2 style={{ color: '#fff', marginBottom: '12px', fontSize: '1.75rem', fontWeight: 800 }}>Dasbor Terkunci</h2>
-            <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.95rem', marginBottom: '32px', lineHeight: 1.6 }}>
-              Untuk keamanan data pribadi, silakan scan <strong style={{ color: '#fff' }}>QR Identity</strong> Anda guna membuka akses penuh ke layanan warga.
+
+            <h2 className="dasbor-lock-title">Dasbor Terkunci</h2>
+            <p className="dasbor-lock-desc">
+              Scan <strong style={{ color: '#fff' }}>QR Identity</strong> Anda untuk membuka akses penuh ke layanan warga TARA.
             </p>
-            
-            <button 
-              className="btn btn-primary btn-premium" 
-              style={{ width: '100%', marginBottom: '20px' }}
-              onClick={() => setShowScanner(true)}
-            >
-              <span className="material-icons-round">qr_code_scanner</span> Mulai Scan QR
+
+            <button className="btn btn-primary btn-premium dasbor-lock-btn" onClick={() => setShowScanner(true)}>
+              <span className="material-icons-round">qr_code_scanner</span>
+              Mulai Scan QR
             </button>
-            
-            <Link 
-              to="/" 
-              style={{ 
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'var(--on-surface-variant)', 
-                fontSize: '0.85rem', 
-                textDecoration: 'none',
-                fontWeight: 600,
-                transition: 'var(--transition)'
-              }}
-              className="back-home-link"
-            >
-              <span className="material-icons-round" style={{ fontSize: '18px' }}>arrow_back</span>
+
+            <Link to="/" className="dasbor-lock-back">
+              <span className="material-icons-round">arrow_back</span>
               Kembali ke Beranda
             </Link>
           </Reveal>
         </div>
       )}
 
-      {/* Scanner Modal */}
+      {/* ── QR Scanner Modal ── */}
       {showScanner && (
-        <QRScannerModal 
-          onSuccess={handleAuthSuccess}
-          onClose={() => setShowScanner(false)}
-        />
+        <QRScannerModal onSuccess={handleAuthSuccess} onClose={() => setShowScanner(false)} />
       )}
 
       <style>{`
-        @keyframes pulse-slow {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.1); opacity: 0.8; }
+        /* Header row */
+        .dasbor-header-row {
+          display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;
+          justify-content: space-between;
         }
-        .back-home-link:hover {
-          color: #fff;
-          transform: translateX(-4px);
+
+        /* User chip */
+        .dasbor-user-chip {
+          display: flex; align-items: center; gap: 10px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 50px; padding: 6px 8px 6px 6px;
+          backdrop-filter: blur(10px);
+          flex-shrink: 0;
         }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        .dasbor-avatar {
+          width: 38px; height: 38px; border-radius: 50%;
+          display: grid; place-items: center; flex-shrink: 0;
+        }
+        .dasbor-user-info {
+          display: flex; flex-direction: column; min-width: 0;
+        }
+        .dasbor-user-name {
+          color: #f3f4f6; font-size: 0.82rem; font-weight: 700;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;
+        }
+        .dasbor-user-meta {
+          font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em;
+          white-space: nowrap;
+        }
+        .dasbor-logout-btn {
+          width: 34px; height: 34px; border-radius: 50%;
+          background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18);
+          color: #f87171; cursor: pointer;
+          display: grid; place-items: center;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .dasbor-logout-btn:hover { background: #f87171; color: #fff; transform: rotate(-8deg) scale(1.05); }
+        .dasbor-logout-btn .material-icons-round { font-size: 16px; }
+
+        /* Stats */
+        .dasbor-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          margin-bottom: 28px;
+        }
+        .dasbor-stat-card {
+          background: rgba(22,23,25,0.8); border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 16px; padding: 24px 16px; text-align: center;
+        }
+        .dasbor-stat-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+        .dasbor-stat-num  { font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 6px; }
+        .dasbor-stat-label { font-size: 0.65rem; color: var(--on-surface-variant); font-weight: 700; letter-spacing: 0.12em; }
+
+        /* Two-col layout */
+        .dasbor-two-col {
+          display: flex; flex-direction: column; gap: 20px;
+        }
+        .dasbor-left-col  { display: flex; flex-direction: column; gap: 20px; }
+        .dasbor-right-col { display: flex; flex-direction: column; gap: 20px; }
+
+        /* Card base */
+        .dasbor-card {
+          background: rgba(22,23,25,0.7) !important;
+          border: 1px solid rgba(255,255,255,0.05) !important;
+          padding: 22px !important;
+        }
+        .dasbor-card-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 18px; gap: 8px;
+        }
+        .dasbor-card-title { color: #f3f4f6; font-size: 1rem; font-weight: 700; margin: 0; }
+
+        /* Empty state */
+        .dasbor-empty-state {
+          display: flex; flex-direction: column; align-items: center; gap: 8px;
+          padding: 28px 16px; text-align: center; color: #4b5563; font-size: 0.82rem;
+        }
+        .dasbor-empty-icon { font-size: 40px; color: #1f2937; margin-bottom: 4px; }
+
+        /* Quick actions grid */
+        .dasbor-quick-grid {
+          display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+        }
+        .dasbor-quick-item {
+          display: flex; flex-direction: column; align-items: center; gap: 8px;
+          padding: 16px 8px; border-radius: 12px;
+          background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+          text-decoration: none; transition: all 0.2s;
+        }
+        .dasbor-quick-item:hover {
+          background: rgba(255,255,255,0.05);
+          border-color: rgba(255,255,255,0.08);
+          transform: translateY(-2px);
+        }
+        .dasbor-quick-icon {
+          width: 44px; height: 44px; border-radius: 12px;
+          display: grid; place-items: center;
+        }
+        .dasbor-quick-icon .material-icons-round { font-size: 22px; }
+        .dasbor-quick-label { font-size: 0.72rem; color: #6b7280; font-weight: 600; text-align: center; }
+
+        /* Identity card */
+        .dasbor-identity-card { text-align: center; }
+        .dasbor-identity-avatar {
+          width: 80px; height: 80px; border-radius: 50%;
+          display: grid; place-items: center;
+          margin: 0 auto 16px;
+          transition: all 0.5s ease;
+        }
+        .dasbor-identity-name {
+          color: #f3f4f6; font-size: 1.05rem; font-weight: 700; margin-bottom: 4px;
+        }
+        .dasbor-identity-ucid { color: #4b5563; font-size: 0.72rem; font-family: monospace; margin-bottom: 10px; }
+        .dasbor-role-badge {
+          display: inline-block; font-size: 0.62rem; font-weight: 800;
+          letter-spacing: 0.08em; padding: 3px 10px; border-radius: 100px;
+        }
+        .dasbor-identity-meta {
+          margin-top: 16px; padding-top: 16px;
+          border-top: 1px solid rgba(255,255,255,0.05);
+          display: flex; flex-direction: column; gap: 8px;
+        }
+        .dasbor-meta-row {
+          display: flex; align-items: center; gap: 8px;
+          color: #6b7280; font-size: 0.78rem;
+        }
+        .dasbor-meta-row .material-icons-round { font-size: 16px; }
+
+        /* Info list */
+        .dasbor-info-list { display: flex; flex-direction: column; gap: 12px; }
+        .dasbor-info-item { display: flex; align-items: flex-start; gap: 12px; }
+
+        /* Lock overlay */
+        .dasbor-lock-overlay {
+          position: fixed; inset: 0; z-index: 150;
+          display: grid; place-items: center;
+          background: rgba(4, 6, 15, 0.55);
+          backdrop-filter: blur(28px);
+          padding: 24px;
+          animation: dasborFadeIn 0.5s ease;
+        }
+        @keyframes dasborFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .dasbor-lock-card {
+          background: rgba(17,18,20,0.92) !important;
+          border: 1px solid rgba(255,255,255,0.08) !important;
+          border-radius: 28px !important;
+          padding: 44px 32px !important;
+          text-align: center;
+          max-width: 380px; width: 100%;
+          box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+        }
+
+        .dasbor-lock-icon-wrap {
+          width: 80px; height: 80px; border-radius: 50%;
+          background: rgba(255,77,141,0.08);
+          border: 1px solid rgba(255,77,141,0.25);
+          box-shadow: 0 0 40px rgba(255,77,141,0.12);
+          display: grid; place-items: center;
+          margin: 0 auto 24px;
+        }
+        .dasbor-lock-icon {
+          font-size: 38px; color: var(--cyber-pink);
+          animation: dasborLockPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes dasborLockPulse {
+          0%,100% { transform: scale(1); opacity: 1; }
+          50%     { transform: scale(1.08); opacity: 0.8; }
+        }
+
+        .dasbor-lock-title {
+          color: #fff; font-size: 1.6rem; font-weight: 800;
+          margin-bottom: 12px; letter-spacing: -0.02em;
+        }
+        .dasbor-lock-desc {
+          color: #4b5563; font-size: 0.88rem; line-height: 1.7;
+          margin-bottom: 28px; max-width: 280px; margin-left: auto; margin-right: auto;
+        }
+        .dasbor-lock-btn {
+          width: 100%; height: 52px; border-radius: 16px; font-size: 0.95rem;
+          margin-bottom: 18px;
+        }
+        .dasbor-lock-back {
+          display: inline-flex; align-items: center; gap: 6px;
+          color: #374151; font-size: 0.82rem; font-weight: 600;
+          text-decoration: none; transition: color 0.2s;
+        }
+        .dasbor-lock-back:hover { color: #6b7280; }
+        .dasbor-lock-back .material-icons-round { font-size: 16px; }
+
+        /* ── Desktop ── */
+        @media (min-width: 768px) {
+          .dasbor-stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+          .dasbor-two-col {
+            flex-direction: row; align-items: flex-start;
+          }
+          .dasbor-left-col  { flex: 2; min-width: 0; }
+          .dasbor-right-col { flex: 1; min-width: 0; }
+          .dasbor-stat-num  { font-size: 2.6rem; }
+        }
+
+        /* ── Small mobile ── */
+        @media (max-width: 400px) {
+          .dasbor-lock-card { padding: 32px 20px !important; }
+          .dasbor-lock-title { font-size: 1.35rem; }
+          .dasbor-user-name  { max-width: 100px; }
         }
       `}</style>
-    </div>
+    </>
   );
 };
