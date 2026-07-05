@@ -84,15 +84,49 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   if (!isAuth) {
     return (
-      <div style={{ minHeight: '100vh', background: '#070B14', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ display: 'inline-flex', padding: '12px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '16px', marginBottom: '16px' }}>
-            <span className="material-icons-round" style={{ fontSize: '32px', color: '#3b82f6' }}>admin_panel_settings</span>
+      <div style={{
+        minHeight: '100vh',
+        background: 'radial-gradient(ellipse at 30% 20%, rgba(29,78,216,0.12) 0%, #070B14 60%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 20px',
+      }}>
+        <div style={{ width: '100%', maxWidth: '700px' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '56px', height: '56px',
+              background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.2)',
+              borderRadius: '16px', marginBottom: '18px',
+            }}>
+              <span className="material-icons-round" style={{ fontSize: '28px', color: '#3b82f6' }}>shield</span>
+            </div>
+            <h1 style={{ color: '#f9fafb', fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
+              TARA Admin Portal
+            </h1>
+            <p style={{ color: '#4b5563', fontSize: '0.88rem', maxWidth: '340px', margin: '0 auto', lineHeight: 1.6 }}>
+              Gunakan QR Code identitas pengurus untuk mengakses sistem.
+            </p>
           </div>
-          <h1 style={{ color: '#fff', fontSize: '2rem', marginBottom: '8px' }}>Sistem Administrator</h1>
-          <p style={{ color: 'var(--on-surface-variant)', fontSize: '0.9rem' }}>Scan QR Identity dengan akses pengurus untuk masuk.</p>
+
+          {/* Scanner card */}
+          <div style={{
+            background: 'rgba(17,18,20,0.8)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '24px',
+            padding: 'clamp(20px, 4vw, 36px)',
+            backdropFilter: 'blur(20px)',
+          }}>
+            <AdminQRScannerModal onSuccess={handleAuthSuccess} />
+          </div>
+
+          {/* Footer */}
+          <p style={{ textAlign: 'center', color: '#1f2937', fontSize: '0.72rem', marginTop: '24px' }}>
+            TARA · Karang Taruna Digital Hub
+          </p>
         </div>
-        <AdminQRScannerModal onSuccess={handleAuthSuccess} />
       </div>
     );
   }
