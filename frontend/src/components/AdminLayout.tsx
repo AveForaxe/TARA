@@ -98,9 +98,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <div style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               width: '64px', height: '64px',
-              borderRadius: '18px', marginBottom: '18px', overflow: 'hidden',
+              background: '#ffffff',
+              borderRadius: '18px', marginBottom: '18px',
+              padding: '7px', boxSizing: 'border-box',
             }}>
-              <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
             </div>
             <h1 style={{ color: '#f9fafb', fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.02em' }}>
               TARA Admin Portal
@@ -148,8 +150,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         }}
       >
         <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-            <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: '#ffffff', borderRadius: '8px', padding: '4px', boxSizing: 'border-box' }}>
+            <img src="/Tara-Icon.png" alt="TARA" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
           </div>
           {isSidebarOpen && <span style={{ fontWeight: 700, letterSpacing: '1px', color: '#fff', fontSize: '1.1rem' }}>TARA SYS</span>}
         </div>

@@ -17,13 +17,39 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+      /* Critical — applied before JS bundle to prevent FOUC on splash */
+      body { margin: 0; background: #070B14; }
+      .splash-screen {
+        position: fixed; inset: 0;
+        background: #070B14;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        z-index: 9999;
+      }
+      .splash-logo {
+        width: 96px; height: 96px;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 11px;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 24px;
+        box-sizing: border-box;
+        box-shadow: 0 8px 32px rgba(255,255,255,0.15);
+      }
+      .splash-logo img {
+        width: 100%; height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+    </style>
   </head>
   <body>
     <div class="splash-screen" id="splashScreen">
       <div class="splash-logo">
-        <img src="/Tara-Icon.png" alt="TARA" style="width:56px;height:56px;object-fit:contain;" />
+        <img src="/Tara-Icon.png" alt="TARA" />
       </div>
-      <div class="logo-text" style="font-size: 1.5rem; letter-spacing: 2px;">TARA</div>
+      <div style="font-family:'Inter',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:2px;color:#f9fafb;">TARA</div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
